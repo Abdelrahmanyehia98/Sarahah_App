@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import express from "express";
 import userRouter from "./src/Modules/Users/user.controller.js";
-//import messageRouter from "./Modules/Messages/message.controller.js";
+import messageRouter from "./src/Modules/Messages/message.controller.js";
 import dbConnection from "./src/DB/db.connection.js";
 
 
@@ -14,7 +14,7 @@ dbConnection();
 
 
 app.use("/users", userRouter);
-//app.use("/messages", messageRouter);
+app.use("/messages", messageRouter);
 
 
 app.use((error, req, res, next) => {

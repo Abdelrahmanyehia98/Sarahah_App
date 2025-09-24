@@ -1,5 +1,5 @@
-import Messages from "../../../DB/Models/messages.model"
-import User from "../../../DB/Models/user.model"
+import Messages from "../../../DB/Models/messages.model.js"
+import User from "../../../DB/Models/user.model.js"
 
 export const sendMessagesService = async(req,res) =>{
     const {content } = req.body
