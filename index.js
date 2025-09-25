@@ -17,8 +17,18 @@ app.use("/users", userRouter);
 app.use("/messages", messageRouter);
 
 
-app.use((error, req, res, next) => {
-    console.log(error.stack);
+// Error handling middleware
+app.use(async(error, req, res, next) => {
+    console.log("session inside error handling middleware: " , req.session );
+
+    if(req.session && req.session.inTransaction()){
+
+        //abort transaction
+        await req.session.abortTransaction()
+        //end session
+        req.session.endSession()
+        return res.status(500).json({ message: "the transaction is aborted" })
+    }
     res.status(error.cause||500).json({ message: "something broke!", error: error.message ,stack: error.stack });
 });
 
