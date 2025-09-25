@@ -8,6 +8,8 @@ import { v4 as uuidv4 } from "uuid"
 import { generateToken , verifyToken } from "../../../Utils/tokens.utils.js";
 import mongoose from "mongoose";
 import Messages from "../../../DB/Models/messages.model.js";
+import { OAuth2Client } from "google-auth-library"
+import { providerEnum } from "../../../Common/enums/user.enum.js";
 
 const uniqueString = customAlphabet('1234567890abcdef', 5)
 
@@ -230,4 +232,64 @@ export const updatePasswordServices = async(req,res)=>{
 
     return res.status(200).json({ message: "Password updated successfully" });
 
+}
+
+
+export const authServiceWithGmail = async (req, res) => {
+
+    const { idToken } = req.body
+    const client = new OAuth2Client()
+
+    const ticket = await client.verifyIdToken({
+        idToken,
+        audience: process.env.WEB_CLIENT_ID,
+    });
+    const { email, given_name, family_name, email_verified, sub } = ticket.getPayload()
+
+    if (!email_verified) {
+        return res.status(404).json({ message: "Email not verified" });
+    }
+
+    const isUserExist = await User.findOne({ googleSub: sub, provider: providerEnum.GOOGLE })
+    let newUser;
+
+    if (!isUserExist) {
+        newUser = new User.create({
+            firstname: given_name,
+            lastname: family_name || " ",
+            email,
+            provider: providerEnum.GOOGLE,
+            isConfirmed: true,
+            password: hashSync(uniqueString(), +process.env.SALT_ROUNDS)
+        })
+    } else {
+        newUser = isUserExist
+        isUserExist.email = email
+        isUserExist.firstname = given_name
+        isUserExist.lastname = family_name
+        await isUserExist.save()
+    }
+
+    const accesstoken = generateToken(
+        { _id: newUser._id, email: newUser.email },
+        process.env.JWT_ACCESS_SECRET,
+        {
+            // issuer: 'https://localhost:3000',
+            // audience: 'https://localhost:4000',
+            expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
+            jwtid: uuidv4()
+        }
+    )
+    const refreshtoken = generateToken(
+        { _id: newUser._id, email: newUser.email },
+        process.env.JWT_REFRESH_SECRET,
+        {
+            // issuer: 'https://localhost:3000',
+            // audience: 'https://localhost:4000',
+            expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+            jwtid: uuidv4()
+        }
+    )
+
+    res.status(200).json({ message: "User signed up successfully", token: { accesstoken, refreshtoken }, user })
 }

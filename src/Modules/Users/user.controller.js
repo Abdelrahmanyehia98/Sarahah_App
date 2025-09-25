@@ -5,14 +5,16 @@ import { autraizationMiddleware } from "../../Middlewares/authorization.middlewa
 import { RoleEnum } from "../../Common/enums/user.enum.js";
 import { validationMiddleware } from "../../Middlewares/validation.middleware.js";
 import { SignUpSchema } from "../../Validators/Schemas/user.schema.js";
+import { authLimiter } from "../../Middlewares/rate-limiter.middleware.js";
 const userRouter = Router();
 
 
-userRouter.post("/signup",validationMiddleware(SignUpSchema), userServices.signUpService);
-userRouter.put("/confirm", userServices.confirmEmailService)
+userRouter.post("/signup",authLimiter,validationMiddleware(SignUpSchema), userServices.signUpService);
+userRouter.put("/confirm",authLimiter, userServices.confirmEmailService);
 userRouter.post("/signin", userServices.signinService);
 userRouter.post("/logout",authenticationMiddleware, userServices.LogoutService);
-userRouter.post("/refresh", userServices.RefreshTokenService)
+userRouter.post("/refresh", userServices.RefreshTokenService);
+userRouter.post("/auth-gmail", userServices.authServiceWithGmail);
 
 
 userRouter.put("/update", authenticationMiddleware , userServices.updateAccountService);

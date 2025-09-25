@@ -1,14 +1,35 @@
 import 'dotenv/config'
 import express from "express";
+import cors from "cors";
+import helmet from "helmet";
 import userRouter from "./src/Modules/Users/user.controller.js";
 import messageRouter from "./src/Modules/Messages/message.controller.js";
 import dbConnection from "./src/DB/db.connection.js";
+import { generalLimiter , authLimiter } from './src/Middlewares/rate-limiter.middleware.js';
 
 
 const app = express();
 
 app.use(express.json());
 
+// Some CORS options
+const whitelist = process.env.WHITE_LISTED_ORIGINS || [];
+const corsOptions = {
+    origin: function (origin, callback) {
+        console.log("origin: ", origin);
+        
+        if ( !origin || whitelist.includes(origin)) {
+            callback(null, true)
+        } else {
+            callback(new Error('Not allowed by CORS'))
+        }
+    }
+}
+
+// Use some Security middlewares
+app.use(cors(corsOptions))
+app.use(generalLimiter)
+app.use(helmet())
 
 dbConnection(); 
 
