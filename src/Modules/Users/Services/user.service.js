@@ -6,6 +6,8 @@ import { customAlphabet } from "nanoid";
 import { emitter } from "../../../Utils/send-email.utils.js"
 import { v4 as uuidv4 } from "uuid"
 import { generateToken , verifyToken } from "../../../Utils/tokens.utils.js";
+import mongoose from "mongoose";
+import Messages from "../../../DB/Models/messages.model.js";
 
 const uniqueString = customAlphabet('1234567890abcdef', 5)
 
@@ -147,13 +149,28 @@ export const updateAccountService = async (req, res) => {
 
 export const deleteAccountService = async (req, res) => {
 
-    const {_id} = req.loggedInUser
-    const deletedResult = await User.deleteOne({ _id })
+    const { user: { _id } } = req.loggedInUser
+    const session = await mongoose.startSession()
+    req.session = session
+    session.startTransaction()
 
-    if (!deletedResult.deletedCount) {
-        return res.status(404).json({ message: "User not found" });
+    const deletedUser = await User.findByIdAndDelete(_id, { session })
+    if (!deletedUser) {
+        return res.status(404).json({ message: "User not found" })
     }
-    return res.status(200).json({ message: "User deleted successfully" })
+ 
+    fs.unlinkSync(deletedUser.profilePicture)
+
+    await DeleteFileFromCloudinary(deletedUser.profilePicture.public_id)
+
+    await Messages.deleteMany({ receiverId: _id }, { session })
+
+    await session.commitTransaction()
+    session.endSession()
+    console.log(`The transaction is commited`);
+
+    return res.status(200).json({ message: "User deleted successfully", deletedUser })
+
 }
 
 
