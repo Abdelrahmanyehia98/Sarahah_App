@@ -3,10 +3,12 @@ import * as userServices from "./Services/user.service.js";
 import { authenticationMiddleware } from "../../Middlewares/authentication.middleware.js";
 import { autraizationMiddleware } from "../../Middlewares/authorization.middleware.js";
 import { RoleEnum } from "../../Common/enums/user.enum.js";
+import { validationMiddleware } from "../../Middlewares/validation.middleware.js";
+import { SignUpSchema } from "../../Validators/Schemas/user.schema.js";
 const userRouter = Router();
 
 
-userRouter.post("/signup", userServices.signUpService);
+userRouter.post("/signup",validationMiddleware(SignUpSchema), userServices.signUpService);
 userRouter.put("/confirm", userServices.confirmEmailService)
 userRouter.post("/signin", userServices.signinService);
 userRouter.post("/logout",authenticationMiddleware, userServices.LogoutService);
