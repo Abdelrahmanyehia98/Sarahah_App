@@ -11,6 +11,7 @@ import { generalLimiter , authLimiter } from './src/Middlewares/rate-limiter.mid
 const app = express();
 
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 // Some CORS options
 const whitelist = process.env.WHITE_LISTED_ORIGINS || [];
