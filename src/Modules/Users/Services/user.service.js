@@ -135,6 +135,13 @@ export const updateAccountService = async (req, res) => {
     if (phoneNumber) {
         updateData.phoneNumber = assymetricEncryption(phoneNumber);
     }
+    
+    if (email) {
+        const existingUser = await User.findOne({ email, _id: { $ne: _id } });
+        if (existingUser) {
+            return res.status(409).json({ message: "Email already in use by another account" });
+        }
+    }
 
     const user = await User.findByIdAndUpdate(
         _id,
