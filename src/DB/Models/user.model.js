@@ -69,6 +69,7 @@ const userSchema = new mongoose.Schema(
             enum: Object.values(providerEnum),
             default: providerEnum.LOCAL
         }, 
+        googlesub:String,
         profilePicture: {
             secure_url: String,
             public_id: String

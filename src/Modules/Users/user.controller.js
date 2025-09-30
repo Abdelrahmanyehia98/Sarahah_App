@@ -6,6 +6,7 @@ import { RoleEnum } from "../../Common/enums/user.enum.js";
 import { validationMiddleware } from "../../Middlewares/validation.middleware.js";
 import { SignUpSchema } from "../../Validators/Schemas/user.schema.js";
 import { authLimiter } from "../../Middlewares/rate-limiter.middleware.js";
+import { hostUpload } from "../../Middlewares/multer.middleware.js";
 const userRouter = Router();
 
 
@@ -20,6 +21,7 @@ userRouter.post("/auth-gmail", userServices.authServiceWithGmail);
 userRouter.put("/update", authenticationMiddleware , userServices.updateAccountService);
 userRouter.delete("/delete", authenticationMiddleware ,userServices.deleteAccountService);
 userRouter.put("/updatePassword", authenticationMiddleware , userServices.updatePasswordServices);
+userRouter.post("/upload-profile", authenticationMiddleware, hostUpload({}).single("profile"), userServices.uploadProfileService); 
 
 
 userRouter.get("/list",authenticationMiddleware,autraizationMiddleware([RoleEnum.ADMIN,RoleEnum.SUPER_ADMIN]), userServices.listUsersService);

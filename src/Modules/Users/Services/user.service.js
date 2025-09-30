@@ -10,6 +10,7 @@ import mongoose from "mongoose";
 import Messages from "../../../DB/Models/messages.model.js";
 import { OAuth2Client } from "google-auth-library"
 import { providerEnum } from "../../../Common/enums/user.enum.js";
+import { UploadFileOnCloudinary, DeleteFolderFromCloudinary } from "../../../Common/services/cloudinary.service.js";
 
 const uniqueString = customAlphabet('1234567890abcdef', 5)
 
@@ -292,4 +293,28 @@ export const authServiceWithGmail = async (req, res) => {
     )
 
     res.status(200).json({ message: "User signed up successfully", token: { accesstoken, refreshtoken }, user })
+}
+
+export const uploadProfileService = async (req, res) => {
+
+    const { user: { _id } } = req.loggedInUser
+    const { path } = req.file
+
+    const { secure_url, public_id } = await UploadFileOnCloudinary(
+        path,
+        {
+            folder: "Sarahah_App/Users/Profiles",
+            resource_type: "image"
+        },
+    )
+
+    const user = await User.findByIdAndUpdate(_id, {
+        profilePicture: {
+            secure_url,
+            public_id
+        }
+    }, { new: true })
+
+    return res.status(200).json({ message: "profile uploaded successfully", user, secure_url })
+
 }
