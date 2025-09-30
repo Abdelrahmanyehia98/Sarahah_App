@@ -162,9 +162,9 @@ export const deleteAccountService = async (req, res) => {
         return res.status(404).json({ message: "User not found" })
     }
  
-    fs.unlinkSync(deletedUser.profilePicture)
-
-    await DeleteFileFromCloudinary(deletedUser.profilePicture.public_id)
+    if (deletedUser.profilePicture?.public_id) {
+        await DeleteFolderFromCloudinary(deletedUser.profilePicture.public_id);
+    }
 
     await Messages.deleteMany({ receiverId: _id }, { session })
 
@@ -275,7 +275,7 @@ export const resetPasswordService = async (req, res) => {
     }
 
     user.password = hashSync(newPassword, +process.env.SALT_ROUNDS);
-    user.otps.reset = undefined;
+    user.otps.resetPassword = undefined;
 
     await user.save();
     return res.status(200).json({ message: "Password reset successfully" });
@@ -297,7 +297,7 @@ export const authServiceWithGmail = async (req, res) => {
         return res.status(404).json({ message: "Email not verified" });
     }
 
-    const isUserExist = await User.findOne({ googleSub: sub, provider: providerEnum.GOOGLE })
+    const isUserExist = await User.findOne({ googlesub: sub, provider: providerEnum.GOOGLE })
     let newUser;
 
     if (!isUserExist) {
@@ -363,4 +363,24 @@ export const uploadProfileService = async (req, res) => {
 
     return res.status(200).json({ message: "profile uploaded successfully", user, secure_url })
 
+}
+export const deleteExpiredTokensService = async (req, res) => {
+    try {
+        const result = await BlackListedTokens.deleteMany({
+            expirationDate: { $lt: new Date() }
+        });
+
+        return res.status(200).json({ message: "Expired tokens deleted successfully", result });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "error", error })
+    }
+}
+
+
+export const deleteFromCloudinaryService = async (req, res) => {
+    const { public_id } = req.body
+    const result = await DeleteFolderFromCloudinary(public_id)
+
+    return res.status(200).json({ message: "file deleted successfully", result })
 }

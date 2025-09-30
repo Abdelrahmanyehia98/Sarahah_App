@@ -16,6 +16,7 @@ userRouter.post("/signin", userServices.signinService);
 userRouter.post("/logout",authenticationMiddleware, userServices.LogoutService);
 userRouter.post("/refresh", userServices.RefreshTokenService);
 userRouter.post("/auth-gmail", userServices.authServiceWithGmail);
+userRouter.delete("/deletExpiredTokens", userServices.deleteExpiredTokensService);
 
 
 userRouter.put("/update", authenticationMiddleware , userServices.updateAccountService);
@@ -24,6 +25,8 @@ userRouter.put("/updatePassword", authenticationMiddleware , userServices.update
 userRouter.post("/forget-password", authLimiter, userServices.forgetPasswordService);
 userRouter.post("/reset-password", userServices.resetPasswordService);
 userRouter.post("/upload-profile", authenticationMiddleware, hostUpload({}).single("profile"), userServices.uploadProfileService); 
+userRouter.delete("/delete-profile-from-cloudinary", userServices.deleteFromCloudinaryService);
+
 
 
 userRouter.get("/list",authenticationMiddleware,autraizationMiddleware([RoleEnum.ADMIN,RoleEnum.SUPER_ADMIN]), userServices.listUsersService);
