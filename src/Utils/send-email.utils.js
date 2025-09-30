@@ -27,7 +27,7 @@ export const sendEmail = async (
 
 
     const info = await transporter.sendMail({
-        from: 'gpt2227263@gmail.com',
+        from: 'abdelrahmanm0112@gmail.com',
         to,
         cc,
         subject,
