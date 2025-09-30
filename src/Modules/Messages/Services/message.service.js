@@ -17,7 +17,7 @@ export const sendMessagesService = async(req,res) =>{
     return res.status(200).json({Message : "message sent successfully",message})
 }
 
-export const getMessagesService = async (req, res) => {
+export const getPublicMessagesService = async (req, res) => {
     const messages = await Messages.find().populate([
         {
             path:"receiverid",
@@ -26,3 +26,19 @@ export const getMessagesService = async (req, res) => {
     ])
     return res.status(200).json({ message: "Messages fetched successfully", messages })
 }
+
+export const getMyMessagesService = async (req, res) => {
+    const { _id } = req.loggedInUser.user;
+    const messages = await Messages.find({ receiverid: _id })
+    .populate([
+        {
+            path:"receiverid",
+            select: "firstName lastName email"
+        }
+    ]);
+    
+    return res.status(200).json({ 
+        message: "Your messages fetched successfully", 
+        messages 
+    });
+};
