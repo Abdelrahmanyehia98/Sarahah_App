@@ -7,4 +7,4 @@ MessagesRouter.post("/send/:receiverid", messageServices.sendMessagesService)
 MessagesRouter.get("/get", messageServices.getMessagesService)
 
 
-export default router;
+export default MessagesRouter;
