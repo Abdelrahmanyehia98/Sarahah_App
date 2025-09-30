@@ -21,6 +21,8 @@ userRouter.post("/auth-gmail", userServices.authServiceWithGmail);
 userRouter.put("/update", authenticationMiddleware , userServices.updateAccountService);
 userRouter.delete("/delete", authenticationMiddleware ,userServices.deleteAccountService);
 userRouter.put("/updatePassword", authenticationMiddleware , userServices.updatePasswordServices);
+userRouter.post("/forget-password", authLimiter, userServices.forgetPasswordService);
+userRouter.post("/reset-password", userServices.resetPasswordService);
 userRouter.post("/upload-profile", authenticationMiddleware, hostUpload({}).single("profile"), userServices.uploadProfileService); 
 
 

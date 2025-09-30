@@ -235,6 +235,52 @@ export const updatePasswordServices = async(req,res)=>{
 
 }
 
+export const forgetPasswordService = async (req, res) => {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    const otp = uniqueString();
+
+    user.otps = {
+        ...user.otps,
+        resetPassword: hashSync(otp, +process.env.SALT_ROUNDS)
+    };
+    await user.save();
+
+    
+    emitter.emit("sendEmail", {
+        to: email,
+        subject: "Password Reset OTP",
+        content: `Your OTP for password reset is ${otp}`
+    });
+
+    return res.status(200).json({ message: "Reset OTP sent to email" });
+};
+
+export const resetPasswordService = async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    const isOtpMatch = compareSync(otp, user.otps?.resetPassword || "");
+    if (!isOtpMatch) {
+        return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    user.password = hashSync(newPassword, +process.env.SALT_ROUNDS);
+    user.otps.reset = undefined;
+
+    await user.save();
+    return res.status(200).json({ message: "Password reset successfully" });
+};
+
 
 export const authServiceWithGmail = async (req, res) => {
 
