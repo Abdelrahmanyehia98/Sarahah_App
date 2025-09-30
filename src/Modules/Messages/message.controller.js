@@ -1,10 +1,10 @@
 import { Router } from "express";
 import * as messageServices from "./Services/message.service.js";
-const router = Router();
+const MessagesRouter = Router();
 
 
-router.post("/send/:receiverId", messageServices.sendMessagesService) 
-router.get("/get", messageServices.getMessagesService)
+MessagesRouter.post("/send/:receiverid", messageServices.sendMessagesService) 
+MessagesRouter.get("/get", messageServices.getMessagesService)
 
 
 export default router;
