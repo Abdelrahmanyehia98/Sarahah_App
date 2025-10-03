@@ -52,13 +52,7 @@ export const signUpService = async (req, res) => {
     emitter.emit('sendEmail', {
         to: email,
         subject: "Confirmation email",
-        content: ` Your confirmation otp is ${otp} `,
-        attachments: [
-            {
-                filename: "confirmation.png",
-                path: "confirmation.png"
-            }
-        ]
+        content: ` Your confirmation otp is ${otp} `
     })
     return res.status(201).json({ message: "User created successfully", user })
 }
@@ -371,20 +365,6 @@ export const uploadProfileService = async (req, res) => {
     return res.status(200).json({ message: "profile uploaded successfully", user, secure_url })
 
 }
-export const deleteExpiredTokensService = async (req, res) => {
-    try {
-        const result = await BlackListedTokens.deleteMany({
-            expirationDate: { $lt: new Date() }
-        });
-
-        return res.status(200).json({ message: "Expired tokens deleted successfully", result });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: "error", error })
-    }
-}
-
-
 export const deleteFromCloudinaryService = async (req, res) => {
     const { public_id } = req.body
     const result = await DeleteFolderFromCloudinary(public_id)

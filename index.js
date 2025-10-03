@@ -6,7 +6,7 @@ import userRouter from "./src/Modules/Users/user.controller.js";
 import messageRouter from "./src/Modules/Messages/message.controller.js";
 import dbConnection from "./src/DB/db.connection.js";
 import { generalLimiter , authLimiter } from './src/Middlewares/rate-limiter.middleware.js';
-
+import "./src/Utils/cron-jobs.utils.js";
 
 const app = express();
 
